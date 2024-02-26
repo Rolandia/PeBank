@@ -1,4 +1,3 @@
-"use client";
 import { Box, Grid } from "@chakra-ui/react";
 
 import Logo from "@/public/Logo";
