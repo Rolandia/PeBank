@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import CustomButton from "@/app/components/customButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const signInSchema = z.object({
   documentId: z.string().length(11, 'Este campo é obrigatório'),
@@ -29,13 +29,24 @@ export default function Form() {
   const theme = useTheme();
   const [disabled, setDisabled] = useState<boolean>(true);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<SignInSchema>({
+  const { register, handleSubmit, watch, setError, clearErrors, formState: { errors } } = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema)
   });
 
   const handleSignIn = (data: SignInSchema) => {
     console.log(data);
   };
+
+  const watchDocumentId = watch('documentId');
+  const watchPassword = watch('password');
+
+  useEffect(() => {
+    setDisabled(true);
+
+    if (watchDocumentId !== '' && watchPassword !== '') {
+      setDisabled(false);
+    } 
+  }, [watch()]);
 
   return (
     <Box
@@ -68,7 +79,17 @@ export default function Form() {
                 border={"none"}
                 borderBottom={"1px solid"}
                 color={theme.colors.whiteAlpha[900]}
-                {... register('documentId')}
+                {... register('documentId', {
+                  onBlur: (e) => {
+                    if (e.target.value === '') {
+                      setError('documentId', {
+                        message: 'Este campo é obrigatório'
+                      });
+                    } else {
+                      clearErrors('documentId');
+                    }
+                  }
+                })}
               />
               {errors?.documentId && (
                 <FormErrorMessage>
@@ -79,11 +100,22 @@ export default function Form() {
             <FormControl isInvalid={errors?.password ? true : false}>
               <Text color={theme.colors.gray[50]}>Senha</Text>
               <Input
+                type="password"
                 variant={"flushed"}
                 border={"none"}
                 borderBottom={"1px solid"}
                 color={theme.colors.whiteAlpha[900]}
-                {... register('password')}
+                {... register('password', {
+                  onBlur: (e) => {
+                    if (e.target.value === '') {
+                      setError('password', {
+                        message: 'Este campo é obrigatório'
+                      });
+                    } else {
+                      clearErrors('password');
+                    }
+                  }
+                })}
               />
               {errors?.password && (
                 <FormErrorMessage>
